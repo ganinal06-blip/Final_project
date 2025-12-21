@@ -105,7 +105,7 @@
 
 ### Схема БД
 
-erDiagram
+
   
     ALLOWED_USERS {
         int id PK
