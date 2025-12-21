@@ -106,6 +106,7 @@
 ### Схема БД
 
 erDiagram
+  
     ALLOWED_USERS {
         int id PK
         string user_identifier UNIQUE
