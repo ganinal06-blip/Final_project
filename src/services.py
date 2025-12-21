@@ -11,6 +11,7 @@ from .config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class ModerationService:
     def __init__(self, bot: Bot):
         self.bot = bot
@@ -77,52 +78,54 @@ class ModerationService:
             identifier = f"@{mem['username']}" if mem.get("username") else str(uid_int)
             unauthorized.append({"id": uid_int, "identifier": identifier})
         return unauthorized
-    async def ban_users(self, chat_id: int, users: List[Dict[str, Any]]) -> int:
-            banned = 0
-            for u in users:
-                uid = u.get("id")
-                identifier = u.get("identifier", str(uid))
-                try:
-                    logger.info("Attempting ban: chat=%s user=%s identifier=%s", chat_id, uid, identifier)
-                    await self.bot.ban_chat_member(chat_id=chat_id, user_id=int(uid))
-                    await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="banned")
-                    banned += 1
-                    logger.info("Banned user %s in chat %s", identifier, chat_id)
-                    await asyncio.sleep(0.2)
-                except TelegramBadRequest as e:
-                    text = str(e).lower()
-                    
-                    if "user_not_participant" in text or "user not participant" in text or "user not found" in text:
-                        logger.info("User %s is not participant in chat %s — removing from members DB.", identifier,
-                                    chat_id)
-                        try:
-                            await self.member_repo.remove_member(chat_id=str(chat_id), user_id=str(uid))
-                            await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier),
-                                                    action="already_left")
-                        except Exception:
-                            logger.exception("Failed removing member record for %s in chat %s", identifier, chat_id)
-                        continue
 
-                    logger.exception("Failed to ban %s in chat %s: %s", identifier, chat_id, e)
-                    await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="ban_failed",
-                                            reason=str(e))
-                    if settings.ADMIN_CHAT_ID:
-                        try:
-                            await self.bot.send_message(settings.ADMIN_CHAT_ID,
-                                                        f"Ошибка при бане {identifier} в чате {chat_id}: {e}")
-                        except Exception:
-                            logger.exception("Failed to notify admin")
-                except Exception as e:
-                    logger.exception("Failed to ban %s in chat %s: %s", identifier, chat_id, e)
-                    await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="ban_failed",
-                                            reason=str(e))
-                    if settings.ADMIN_CHAT_ID:
-                        try:
-                            await self.bot.send_message(settings.ADMIN_CHAT_ID,
-                                                        f"Ошибка при бане {identifier} в чате {chat_id}: {e}")
-                        except Exception:
-                            logger.exception("Failed to notify admin")
-            return banned
+    async def ban_users(self, chat_id: int, users: List[Dict[str, Any]]) -> int:
+        banned = 0
+        for u in users:
+            uid = u.get("id")
+            identifier = u.get("identifier", str(uid))
+            try:
+                logger.info("Attempting ban: chat=%s user=%s identifier=%s", chat_id, uid, identifier)
+                await self.bot.ban_chat_member(chat_id=chat_id, user_id=int(uid))
+                await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="banned")
+                banned += 1
+                logger.info("Banned user %s in chat %s", identifier, chat_id)
+                await asyncio.sleep(0.2)
+            except TelegramBadRequest as e:
+                text = str(e).lower()
+
+                if "user_not_participant" in text or "user not participant" in text or "user not found" in text:
+                    logger.info("User %s is not participant in chat %s — removing from members DB.", identifier,
+                                chat_id)
+                    try:
+                        await self.member_repo.remove_member(chat_id=str(chat_id), user_id=str(uid))
+                        await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier),
+                                                action="already_left")
+                    except Exception:
+                        logger.exception("Failed removing member record for %s in chat %s", identifier, chat_id)
+                    continue
+
+                logger.exception("Failed to ban %s in chat %s: %s", identifier, chat_id, e)
+                await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="ban_failed",
+                                        reason=str(e))
+                if settings.ADMIN_CHAT_ID:
+                    try:
+                        await self.bot.send_message(settings.ADMIN_CHAT_ID,
+                                                    f"Ошибка при бане {identifier} в чате {chat_id}: {e}")
+                    except Exception:
+                        logger.exception("Failed to notify admin")
+            except Exception as e:
+                logger.exception("Failed to ban %s in chat %s: %s", identifier, chat_id, e)
+                await self.log_repo.log(chat_id=str(chat_id), user_identifier=str(identifier), action="ban_failed",
+                                        reason=str(e))
+                if settings.ADMIN_CHAT_ID:
+                    try:
+                        await self.bot.send_message(settings.ADMIN_CHAT_ID,
+                                                    f"Ошибка при бане {identifier} в чате {chat_id}: {e}")
+                    except Exception:
+                        logger.exception("Failed to notify admin")
+        return banned
+
     async def clean_chat(self, chat_id: int) -> Dict[str, int]:
         logger.info("Starting clean_chat for chat=%s", chat_id)
         members = await self.member_repo.list_members_by_chat(str(chat_id))
