@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from aiogram import Bot, Dispatcher
