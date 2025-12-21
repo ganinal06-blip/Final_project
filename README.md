@@ -101,3 +101,31 @@
 <p align="center">
   <img src="images/img-4.jpeg" width="50%">
 </p>
+
+
+### Схема БД
+
+erDiagram
+    ALLOWED_USERS {
+        int id PK
+        string user_identifier UNIQUE
+        datetime created_at
+    }
+
+    MEMBERS {
+        int id PK
+        string chat_id
+        string user_id
+        string username
+        datetime last_seen
+    }
+
+    ACTION_LOGS {
+        int id PK
+        string chat_id
+        string user_identifier
+        string action
+        datetime timestamp
+        string reason
+    }
+
