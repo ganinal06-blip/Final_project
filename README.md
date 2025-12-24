@@ -39,7 +39,7 @@
 - **Python**  
 - **Aiogram** (бот)  
 - **SQLAlchemy** (работа с БД)  
-- **SQLite / PostgreSQL** (хранилище)  
+- **SQLite** (хранилище)  
 - **Docker + Docker Compose** 
 - **Pytest** (тестирование)  
 
