@@ -36,9 +36,9 @@
 
 ## 3. Архитектура  
 ### 3.1. Технологический стек  
-- **Python 3.11+**  
-- **Aiogram 3.x** (асинхронный бот)  
-- **SQLAlchemy 2.0** (асинхронная работа с БД)  
+- **Python**  
+- **Aiogram** (бот)  
+- **SQLAlchemy** (работа с БД)  
 - **SQLite / PostgreSQL** (хранилище)  
 - **Docker + Docker Compose** 
 - **Pytest** (тестирование)  
